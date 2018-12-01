@@ -1,0 +1,7 @@
+Golang工具链
+
+# 编译发现多个goroutine并发并行抢夺同一个资源的竞争race情况
+go build -race main.go
+
+
+
