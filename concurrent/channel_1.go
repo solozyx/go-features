@@ -1,8 +1,16 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
+
+/*
+intChan 的值=0xc04207a000 intChan本身的地址=0xc042068018
+channel len= 3 cap=3
+num2= 211
+channel len= 2 cap=3
+num3= 50 num4= 98
+
+Process finished with exit code 0
+*/
 
 func main() {
 	//1. 创建一个可以存放3个int类型的管道
@@ -18,7 +26,7 @@ func main() {
 	intChan<- 50
 	//如果从channel取出数据后，可以继续放入
 	<-intChan
-	//注意点, 当我们给管道写入数据时，不能超过其容量
+	//注意, 当我们给管道写入数据时，不能超过其容量
 	intChan<- 98
 	//4. 管道的长度和cap(容量) 3, 3
 	fmt.Printf("channel len= %v cap=%v \n", len(intChan), cap(intChan))
@@ -34,7 +42,8 @@ func main() {
 	// 如果我们的管道数据已经全部取出，再取就会报告 deadlock
 	num3 := <-intChan
 	num4 := <-intChan
+
 	// deadlock
-	//num5 := <-intChan
+	// num5 := <-intChan
 	fmt.Println("num3=", num3, "num4=", num4/*, "num5=", num5*/)
 }

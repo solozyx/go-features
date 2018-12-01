@@ -1,3 +1,19 @@
+
+channel 引用传递
+    | intChan 的值=0xc04207a000 intChan本身的地址=0xc042068018
+    | intChan==0xc042068018 存储 [ 0xc04207a000 ]
+    | 队列 先进先出 协程安全 多goroutine访问不需要加锁
+    | 多个goroutine操作同一个channel不会发生资源竞争问题
+    | channel必须先make初始化才能put数据
+    | channel 和 map 不同，Map会自动增长键值对，channel不能自动增长
+    | 容量是make指定的，管道在make后容量不会变化
+    | 管道的价值在于 边放边取
+    | channel执行了pop操作len减少cap不变
+    | channel的cap在push满后就不能再放入元素了
+    | channel关闭后只可读不可写 panic:send on closed channel
+    | 未关闭pop掉所有元素后继续pop则deadlock
+
+
 go-grammar-feature/ Go语言语法特性展示 项目根目录作为 GOPATH
 (export GOPATH=`pwd`)
     |--interview/

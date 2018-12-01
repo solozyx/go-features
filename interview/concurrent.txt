@@ -92,3 +92,51 @@ lock.Unlock()
 协程1执行完毕，解锁，【底层有一种机制，从协程队列取出排队在最前面的协程去执行】
 如果其他的协程等这把锁一直没等到，就会【超时】
 
+【channel】
+使用【全局变量myMap】+【sync.Mutex锁同步】解决goroutine通信可行，但不完美
+1.主线程等待所有goroutine全部完成的时间很难确定，手动sleep时间段仅仅是人的估算
+2.实际上没有利用多个协程对全局变量的读写操作，还是回归到了串行
+
+channel 引用传递 队列 先进先出 协程安全 多goroutine访问不需要加锁
+intChan 的值=0xc04207a000 intChan本身的地址=0xc042068018
+intChan==0xc042068018 存储 [ 0xc04207a000 ]
+把一个channel传到一个函数中，操作的是同一个channel，引用类型
+
+管道：取最前面的，【取完后长度减少】
+intChan <- item
+数据在管道尾部追加
+channel 和 map 不同，Map会自动增长键值对，channel不能自动增长
+容量是make指定的，管道在make后容量不会变化
+管道的价值在于 边放边取
+channel执行了pop操作len减少cap不变
+channel的cap在push满后就不能再放入元素了
+channel关闭后只可读不可写 panic:send on closed channel
+未关闭pop掉所有元素后继续pop则deadlock
+
+把管道存储的类型声明为 空接口 就可以放 多态数组
+存放任意类型的channel
+allChan := make(chan interface{}, 3)
+
+【类型断言】
+// 下面的写法是错误的!编译不通过
+// 在编译的层面 认为 newCat 是空接口类型 接口类型里面是没有字段
+// 编译层面 =/= 运行层面
+// fmt.Printf("newCat.Name=%v", newCat.Name)
+
+//使用类型断言
+a := newCat.(Cat)
+fmt.Printf("newCat.Name=%v", a.Name)
+
+【channel遍历】
+普通for循环 for i := 0; i < len(channel); i++ {
+这样遍历只能取出 len(channel)/2 个元素 因为每 pop 1个元素 len会减去1
+容量遍历也不行，容量也不能代表管道有多少个数据
+所以channel遍历不能使用普通for循环 要使用 for...range...
+
+如果不关闭管道一直遍历 for v := range channel { 会出现deadlock的错误
+fatal error : all goroutines are asleep - deadlock!
+
+如果channel已经关闭，则会正常遍历数据，遍历完后，就会退出遍历
+close(channel)
+for v := range channel { 正常运行不会deadlock
+
