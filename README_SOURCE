@@ -13,6 +13,7 @@ channel 引用传递
     | channel关闭后只可读不可写 panic:send on closed channel
     | 未关闭pop掉所有元素后继续pop则deadlock
 
+nil slice | nil map | nil channel 不能使用 要先make初始化
 
 go-grammar-feature/ Go语言语法特性展示 项目根目录作为 GOPATH
 (export GOPATH=`pwd`)

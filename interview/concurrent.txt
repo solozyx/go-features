@@ -107,6 +107,53 @@ intChan 的值=0xc04207a000 intChan本身的地址=0xc042068018
 intChan==0xc042068018 存储 [ 0xc04207a000 ]
 把一个channel传到一个函数中，操作的是同一个channel，引用类型
 
+读[pop] 写[push] channel都是阻塞的
+【阻塞】
+同一个channel 子协程g1向它写push 子协程g2从它读pop
+
+g1有10行代码 执行到 第2行 向channel 写入push数据 后面的8行卡着不执行了
+g1什么时候解除阻塞?
+g2从channel把数据读pop走 将g1的阻塞就解除了，后面的8行代码可以执行了
+g1阻塞需要其他goroutine来解除阻塞
+
+同样
+g2从channel读pop数据也是阻塞的 g2有10行代码 第3行从channel取数据 后面7行阻塞
+g2什么时候解除阻塞?
+g1向管道channel写入push进数据
+
+g1写push 和 g2读pop 都是阻塞的 彼此解除对方的阻塞
+
+主协程从channel读取pop数据，这个数据读不到，阻塞
+主协程什么时候解除阻塞?
+子协程g1 和/或 子协程g2 向该channel写入push数据后 主线程解除阻塞
+
+channel，通道
+概念：专门用于goroution之间，传递数据的。类似于通信的消息队列
+语法：数据类型，make()，也是引用类型的数据
+
+make初始化channel需要关联一种数据类型 可以关联 string int 指明该channel能存储的数据类型
+var intChan chan int // nil chan，同map一样，不能使用。
+
+
+操作：goroutine可以从chan中读取数据，另一个goroutine从中写入数据
+对同一个channel，同一个goroutine无法对其 既读又写
+读 写要先执行1个 读的时候阻塞了 写怎么执行? 写的时候阻塞了 读怎么执行?
+
+操作运算符：<-
+从chan中读取数据,data := <- chan
+向chan中写入数据, chan <- data
+
+阻塞：对于chan的读取和写入的操作，都是阻塞式的。
+阻塞式：导致程序暂时不能执行，直到解除阻塞。
+
+从chan中读取数据：阻塞式，直到另一个goroutine向通道中写入数据，解除阻塞。
+向chan中写入数据：阻塞式，直到另一个goroutine从通道中将数据读取出，解除阻塞。
+读pop 和 写push 是对应的，g1想读成功g2要向里面写，g2想写成功g1要把数据读走
+
+如果通道带缓存，写阻塞要发生在通道满的情况下,读阻塞发生在通道读取pop完的情况下
+
+
+
 管道：取最前面的，【取完后长度减少】
 intChan <- item
 数据在管道尾部追加
