@@ -179,7 +179,44 @@ allChan := make(chan interface{}, 3)
 a := newCat.(Cat)
 fmt.Printf("newCat.Name=%v", a.Name)
 
+从通道中读取数据：
+同 value,ok := map[key] 类似
+ok数值为true，是map[key]的值；ok数值为false，map没有该key
+
+data := <- chan
+data,ok := <- chan
+ok数值为true，通道正常，读取到的data数据有效可用
+ok数值为false，通道异常，一般是通道关闭，【读取到data是通道类型的默认零值，读取到的该零值无效不可用】
+
+通道的关闭：发送方如果数据写入完毕，可以关闭通道，用于通知接受方数据传递完毕
+            通道的关闭操作发送方和接收方都可以做，但是使用中没有接收方关闭通道的
+g1-->chan 写入数据
+	向通道写数据的一方，知道自己向通道写入多少数据就写完了
+g2-->chan 读取数据
+	从通道接收数据的一方，往往并不知道发送方写完还是没写完
+	轮询去读，如果读取到最后，chan的所有数据都读取pop掉了
+	该goroutine阻塞，发送方没有数据写入给它解除阻塞 导致 deadlock
+	接收方读取close的chan这里的value是false
+g3
+g4
+...
+
+发送方 【close(channel)】 要 接收方在
+for {
+    【data,ok := <- chan】
+    if !ok {
+        【break】
+    }
+}
+配合break使用
+关闭的通道也能读取返回通道类型的零值但是没有意义
+
 【channel遍历】
+for range：数组，切片，map，string，chan
+	数组/切片/string--->index，value
+	map--->key, value
+	chan--->value
+
 普通for循环 for i := 0; i < len(channel); i++ {
 这样遍历只能取出 len(channel)/2 个元素 因为每 pop 1个元素 len会减去1
 容量遍历也不行，容量也不能代表管道有多少个数据
@@ -191,4 +228,5 @@ fatal error : all goroutines are asleep - deadlock!
 如果channel已经关闭，则会正常遍历数据，遍历完后，就会退出遍历
 close(channel)
 for v := range channel { 正常运行不会deadlock
+
 
