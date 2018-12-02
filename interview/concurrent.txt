@@ -229,4 +229,9 @@ fatal error : all goroutines are asleep - deadlock!
 close(channel)
 for v := range channel { 正常运行不会deadlock
 
+【缓冲通道】自带一块缓冲区，可以暂时存储数据，如果缓冲区满了，才会阻塞
+
+【非缓冲通道】默认创建的通道，都是非缓冲的，阻塞都是即时发生的，
+写入1个数据就阻塞，等待其他协程读取这个数据，解除阻塞
+读取1个数据就阻塞，等待其他协程新写入1个数据，解除阻塞
 
