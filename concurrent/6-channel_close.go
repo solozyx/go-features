@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 func closeChan() {
@@ -19,6 +20,8 @@ func closeChan() {
 	n1 := <-intChan
 	fmt.Println("n1=", n1)
 }
+
+
 
 func iterateChan() {
 	intChan2 := make(chan int, 100)
@@ -41,6 +44,7 @@ func iterateChan() {
 }
 
 func main() {
-	closeChan()
-	iterateChan()
+	// closeChan()
+	closeChan1()
+	// iterateChan()
 }

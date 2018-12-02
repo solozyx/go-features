@@ -84,7 +84,7 @@ func chanDeadlock2() {
 }
 
 /*
-子 goroutine ...
+子 goroutine 从通道中读取到main主协程传来的数据是:  100
 main主协程over ...
 
 Process finished with exit code 0
@@ -95,14 +95,14 @@ func chanResolveDeadlock1() {
 
 	// 主协程阻塞了 需要另一个协程帮主协程解除阻塞
 	go func() {
-		fmt.Println("子 goroutine ... ")
 		// 阻塞式，从通道中读取数据
 		// 子协程 data := <- intChan 也阻塞
 		// 该子协程的阻塞由 主协程intChan <- 100 写channel解除
 		data := <- intChan
-		time.Sleep(5*time.Second)
 		fmt.Println("子 goroutine 从通道中读取到main主协程传来的数据是: ",data)
 	}()
+	// 在 go func(){}() 中 intChan可以直接使用 goroutine执行1个匿名函数
+	// 可以操作它上面定义的局部变量
 
 	// intChan <- 100 导致主协程阻塞
 	// 该主协程的阻塞 由 子协程 data := <- intChan 读channel解除
@@ -113,9 +113,118 @@ func chanResolveDeadlock1() {
 	fmt.Println("main主协程over ...")
 }
 
+/*
+main主协程over ...
+
+Process finished with exit code 0
+*/
+func chanResolveDeadlock2() {
+	var intChan chan int
+	intChan = make(chan int)
+
+	go func() {
+		data := <- intChan
+		time.Sleep(5*time.Second)
+		fmt.Println("子 goroutine 从通道中读取到main主协程传来的数据是: ",data)
+	}()
+	intChan <- 100
+	fmt.Println("main主协程over ...")
+}
+
+/*
+子 goroutine 从通道中读取到main主协程传来的数据是:  100
+main主协程over ...
+
+Process finished with exit code 0
+*/
+func chanSubDoneMainExit() {
+	var intChan chan int
+	intChan = make(chan int)
+
+	doneChan := make(chan bool)
+
+	go func() {
+		data := <- intChan
+		time.Sleep(5*time.Second)
+		fmt.Println("子 goroutine 从通道中读取到main主协程传来的数据是: ",data)
+		doneChan <- true
+	}()
+	intChan <- 100
+	<- doneChan
+	fmt.Println("main主协程over ...")
+}
+
+/*
+子goroutine执行 ..
+main主协程 读取到数据:  hello
+main主协程 执行时间:  5
+
+Process finished with exit code 0
+*/
+func sleepChan() {
+	ch1 := make(chan string)
+	start := time.Now().Unix()
+	go func() {
+		fmt.Println("子goroutine执行 .. ")
+		time.Sleep(5*time.Second)
+		ch1 <- "hello"
+	}()
+
+	time.Sleep(2*time.Second)
+
+	data := <- ch1
+	end := time.Now().Unix()
+	fmt.Println("main主协程 读取到数据: ",data)
+	fmt.Println("main主协程 执行时间: ",end-start)
+}
+
+/*
+main 主协程创建了通道ch1:  0xc04203c060
+printLetter 子协程接收到通道ch1:  0xc04203c060
+	1,A
+printNum 子协程接收到通道ch1:  0xc04203c060
+1
+2
+	2,B
+main 主协程执行完毕..
+
+Process finished with exit code 0
+*/
+func printTest(){
+	ch1 :=make(chan bool)
+	fmt.Println("main 主协程创建了通道ch1: ",ch1)
+	go printNum(ch1) // 引用传递
+	go printLetter(ch1)
+	<- ch1
+	<- ch1
+	fmt.Println("main 主协程执行完毕..")
+}
+
+func printNum(ch1 chan bool){
+	fmt.Println("printNum 子协程接收到通道ch1: ",ch1)
+	for i := 1; i <= 2; i++ {
+		fmt.Println(i)
+		time.Sleep(10*time.Millisecond)
+	}
+	ch1<-true
+}
+
+func printLetter(ch1 chan bool){
+	fmt.Println("printLetter 子协程接收到通道ch1: ",ch1)
+	for i := 1; i<=2; i++ {
+		fmt.Printf("\t%d,%c\n",i,64+i)
+		time.Sleep(10*time.Millisecond)
+	}
+	ch1 <- true
+}
+
 func main() {
 	// chan1()
 	// chanDeadlock1()
 	// chanDeadlock2()
-	chanResolveDeadlock1()
+	// chanResolveDeadlock1()
+	// chanResolveDeadlock2()
+	// chanSubDoneMainExit()
+	// sleepChan()
+	printTest()
 }
