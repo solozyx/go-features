@@ -269,4 +269,23 @@ select {
 通道操作 和 对应分支 都随机
 如果chan1读写操作 chan2读写操作 都不能执行 则 select deadlock
 
+【sync.WaitGroup 同步等待组】
+同步等待组WaitGourp,创建出来 内置计数器 counter 值为 0
+Add()和Done()设置counter的值,
+wg.Add(),设置counter的值,有几个goroutine执行就设置几
+wg.Done()，将counter减1，同Add(-1)
+wg.Wait()
+哪个goroutine执行了Wait(),哪个goroutine就会被阻塞
+直到counter为0 对应的goroutine 解除阻塞
+WaitGroup内置计数器counter值不能为负数,否则会引发恐慌panic
+
+如果在main协程的main函数
+func main(){
+    wg.Add(3)
+	go printNum1(&wg)
+	go printNum2(&wg)
+}
+fatal error: all goroutines are asleep - deadlock!
+
+
 
