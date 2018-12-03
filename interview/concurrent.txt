@@ -247,6 +247,8 @@ for v := range channel { 正常运行不会deadlock
 	函数，只有读取数据，单向通道限定方向
 ·语法级别：保证通道操作安全
 
-
+【定时器timer对chan的操作】
+1.Timer：计时器 	NewTimer(duration)-->*Timer对象：struct：字段C  <-chan Time
+2.After(duration)-->  <-chan Time
 
 
