@@ -251,4 +251,22 @@ for v := range channel { 正常运行不会deadlock
 1.Timer：计时器 	NewTimer(duration)-->*Timer对象：struct：字段C  <-chan Time
 2.After(duration)-->  <-chan Time
 
+【select分支语句 通道读写操作选择器】
+随机选择可执行的case
+没有case可运行它将阻塞，直到有case可执行
+
+select的每一个case都必须是一个通道操作
+要么是读取通道的操作/要么是写入通道操作
+
+select {
+	case chan1读写操作:
+		分支1
+	case chan2读写操作:
+		分支2
+}
+两个case中的通道都可执行，随机选择一个case的通道操作 和 对应分支执行
+其他case的通道操作 和 分支 都不执行
+通道操作 和 对应分支 都随机
+如果chan1读写操作 chan2读写操作 都不能执行 则 select deadlock
+
 
