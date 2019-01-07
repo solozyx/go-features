@@ -1,2 +1,2 @@
-# go-grammar-feature
-Golang 基础语法特性 展示
+# go-features
+Golang 语法特性 展示
