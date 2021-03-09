@@ -2,6 +2,17 @@ package main
 
 import "fmt"
 
+/*
+0x63d578
+0x63d578
+true
+true
+0x63d578
+0x63d578
+true
+true
+*/
+
 func main() {
 	a := struct{}{}
 	b := struct{}{}
